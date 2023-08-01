@@ -19,6 +19,8 @@ import {  Box, Button, Divider, Snackbar, TextField, TextareaAutosize } from '@m
 import MuiAlert from '@mui/material/Alert';
 import Link from '@mui/material/Link';
 import CommentForm from '../Comment/CommentForm';
+import { PostWithAuth } from '../../services/HttpService';
+import { useNavigate } from 'react-router-dom';
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -76,38 +78,25 @@ export default function PostForm(props) {
   const [text, setText] = React.useState("")
   const [isSent, setIsSent] = React.useState(false);
 
+  const navigate = useNavigate();
   const savePost = () => {
-    // İstek yapılacak URL'yi belirtin
-    const url = 'http://localhost:8080/posts';
-  
-    // İstek yapılacak verileri ve ayarları içeren bir nesne oluşturun
-    const options = {
-      method: 'POST', // POST isteği yapılacak
-      headers: {
-        'Content-Type': 'application/json' // İstek gövdesinin JSON olduğunu belirtin
-      },
-      body: JSON.stringify({
-        title: 'Sample Post',
-        text: text,
-        postUserId: postUserId
-      })
-    };
-  
-    // fetch fonksiyonunu kullanarak isteği gönderin ve yanıtı işleyin
-    fetch(url, options)
-      .then(response => {
-        // Yanıtı kontrol edin ve gerekirse işleyin
-        if (response.ok) {
+    PostWithAuth("/posts", {
+      id:0,
+      title: 'Sample Post', 
+      text : text,
+      postUserId : postUserId,
+    })
+      .then((res) => {
+        if (res.ok) {
           console.log('Post saved successfully!');
           setIsSent(true);
+          setTimeout(() => {
+            navigate(0)
+          }, 1000);
         } else {
           throw new Error('Failed to save post.');
-        }
-      })
-      .catch(error => {
-        // Hata durumunda hata mesajını yakalayın ve işleyin
-        console.error(error);
-      });
+        }})
+      .catch((err) => console.log(err))
   };
 
   const handleExpandClick = () => {
@@ -121,9 +110,9 @@ export default function PostForm(props) {
   const handleSubmit = () => {
     savePost();
     setText("");
-    setTimeout(() => {
-      window.location.reload(); // Reload the page after a delay
-    }, 1000);
+    // setTimeout(() => {
+    //   window.location.reload(); // Reload the page after a delay
+    // }, 1000);
 
   };
   const handleText = (value) => {
@@ -156,7 +145,7 @@ export default function PostForm(props) {
           sx={{ bgcolor: blueGrey.A700 }}
           aria-label="recipe"
           >
-              H
+              {localStorage.getItem("currentUser") != null ? localStorage.getItem("userName").charAt(0).toUpperCase() : "Q"}
           </Avatar>
          }
          title = {

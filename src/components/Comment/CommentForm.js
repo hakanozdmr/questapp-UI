@@ -18,6 +18,8 @@ import { Box, Button, Divider, Snackbar, TextField, TextareaAutosize } from '@mu
 
 import MuiAlert from '@mui/material/Alert';
 import Link from '@mui/material/Link';
+import { PostWithAuth } from '../../services/HttpService';
+import { useNavigate } from 'react-router-dom';
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -63,37 +65,25 @@ export default function CommentForm(props) {
   const [commentLiked, setCommentLiked] = React.useState({}); // State for tracking liked status of comments
   const theme = useTheme();
 
+  const navigate = useNavigate();
   const saveComment = () => {
-    // İstek yapılacak URL'yi belirtin
-    const url = 'http://localhost:8080/comments';
-  
-    // İstek yapılacak verileri ve ayarları içeren bir nesne oluşturun
-    const options = {
-      method: 'POST', // POST isteği yapılacak
-      headers: {
-        'Content-Type': 'application/json' // İstek gövdesinin JSON olduğunu belirtin
-      },
-      body: JSON.stringify({
-        text: text,
-        userId: userId,
-        postId: postId
-      })
-    };
-  
-    // fetch fonksiyonunu kullanarak isteği gönderin ve yanıtı işleyin
-    fetch(url, options)
-      .then(response => {
-        // Yanıtı kontrol edin ve gerekirse işleyin
-        if (response.ok) {
+
+    PostWithAuth("/comments", {
+      id:0,
+      text: text,
+      userId: userId,
+      postId: postId
+    })
+      .then((res) => {
+        if (res.ok) {
           console.log('Comment saved successfully!');
+          setIsSent(true);
+          navigate(0)
         } else {
           throw new Error('Failed to save post.');
-        }
-      })
-      .catch(error => {
-        // Hata durumunda hata mesajını yakalayın ve işleyin
-        console.error(error);
-      });
+        }})
+      .catch((err) => console.log(err))
+
   };
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -129,9 +119,9 @@ export default function CommentForm(props) {
 
   return (
     <div> 
-      <Snackbar open={isSent} autoHideDuration={6000} onClose={handleClose}  anchorOrigin={{ vertical:'top',horizontal: 'center' }} >
+      <Snackbar open={isSent} autoHideDuration={2000} onClose={handleClose}  anchorOrigin={{ vertical:'top',horizontal: 'center' }} >
         <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-          Post Başarıyla Gönderildi
+          Yorum Başarıyla Gönderildi
         </Alert>
       </Snackbar>
       <Box sx={{ background: 'radial-gradient(circle, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);',
@@ -143,7 +133,7 @@ export default function CommentForm(props) {
             sx={{ bgcolor: blueGrey.A700 }}
             aria-label="recipe"
             >
-                H
+                 {localStorage.getItem("currentUser") != null ? localStorage.getItem("userName").charAt(0).toUpperCase() : "Q"}
             </Avatar>
            }
            title = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -13,20 +13,32 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { blueGrey } from '@mui/material/colors';
 
-const userId=5;
+
+const userId=localStorage.getItem("currentUser");
 const pages = [
   { label: 'Home', path: '/' },
   { label: 'User', path: `/user/${userId}` },
   { label: 'Blog', path: '/post' }
 ];
-
+const authPages = [
+  { label: 'Login', path: '/auth' },
+  { label: 'Register', path: `register` }
+];
+const settingPages = [
+  { label: 'Profile', path: '/' },
+  { label: 'User', path: `/user/${userId}` },
+  { label: 'Logout', path: '/logout'}
+];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar() {
    
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  
+
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -42,6 +54,8 @@ function Navbar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+  
+
 
   return (
     <AppBar position="static" sx={{background:'radial-gradient(circle, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);'}} >
@@ -134,11 +148,16 @@ function Navbar() {
               </Button>
             ))}
           </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
+             
+          {localStorage.getItem("currentUser") != null ? <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              <Avatar
+                sx={{ bgcolor: blueGrey.A700 }}
+                aria-label="recipe"
+                >
+                    {localStorage.getItem("userName").charAt(0).toUpperCase()}
+              </Avatar>
               </IconButton>
             </Tooltip>
             <Menu
@@ -157,13 +176,39 @@ function Navbar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+              {settingPages.map((settingPage) => (
+                <MenuItem key={settingPage.label} onClick={handleCloseUserMenu}>
+                  <Typography textAlign="center"
+                   sx={{
+                    textDecoration: 'none',
+                    color: 'black', 
+                  }}
+                   component={Link} to={settingPage.path}>{settingPage.label}</Typography>
                 </MenuItem>
               ))}
             </Menu>
-          </Box>
+          </Box> :  
+           <Box sx={{ flexGrow: 0, display: { xs: 'none', md: 'flex' } }}
+         >
+           {authPages.map((authPage) => (
+             <MenuItem key={authPage.label} onClick={handleCloseNavMenu}>
+              <Button
+                key={authPage.label}
+                onClick={handleCloseNavMenu}
+                component={Link}
+                to={authPage.path}
+                sx={{ my: 2, color: 'white', display: 'block' }}
+              >
+                {authPage.label}
+              </Button>
+               {/* <Typography textAlign="center"  sx={{
+                    textDecoration: 'none',
+                    color: 'black', 
+                  }} component={Link} to={authPage.path}>{authPage.label}</Typography> */}
+             </MenuItem>
+           ))}
+         </Box>}
+          
         </Toolbar>
       </Container>
     </AppBar>
